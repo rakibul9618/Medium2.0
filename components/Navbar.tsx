@@ -1,5 +1,40 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import React, { Children } from 'react';
+import { useRouter } from 'next/router';
+
+interface ActiveLinkType {
+  children: any;
+  activeClass: string;
+  href: string;
+  as?: string;
+}
+
+const ActiveLink: NextPage<ActiveLinkType> = ({
+  children,
+  activeClass,
+  ...props
+}) => {
+  const { asPath } = useRouter();
+  const child = Children.only(children);
+  const childClassName = child.props.className || '';
+
+  // pages/index.js will be matched via props.href
+  // pages/about.js will be matched via props.href
+  // pages/[slug].js will be matched via props.as
+  const className =
+    asPath === props.href || asPath === props.as
+      ? `${childClassName} ${activeClass}`.trim()
+      : childClassName;
+
+  return (
+    <Link {...props}>
+      {React.cloneElement(child, {
+        className: className || null,
+      })}
+    </Link>
+  );
+};
 
 const Navbar: NextPage = () => {
   return (
@@ -14,25 +49,42 @@ const Navbar: NextPage = () => {
         </div>
         <div className="flex items-center">
           <div className="pr-2 hidden md:block">
-            <Link href="/">
-              <a className="px-2 py-1">Our story</a>
-            </Link>
-            <Link href="/">
-              <a className="px-2 py-1">Membership</a>
-            </Link>
-            <Link href="/">
-              <a className="px-2 py-1">Write</a>
-            </Link>
-            <Link href="/auth/signin">
-              <a className="px-2 py-1">Sign In</a>
-            </Link>
+            <ActiveLink
+              activeClass="text-white font-medium"
+              href="/our-story/story"
+            >
+              <a className="px-2 py-1 hover:text-white transition-colors duration-300">
+                Our story
+              </a>
+            </ActiveLink>
+            <ActiveLink activeClass="text-white font-medium" href="/membership">
+              <a className="px-2 py-1 hover:text-white transition-colors duration-300">
+                Membership
+              </a>
+            </ActiveLink>
+            <ActiveLink activeClass="text-white font-medium" href="/">
+              <a className="px-2 py-1 hover:text-white transition-colors duration-300">
+                Write
+              </a>
+            </ActiveLink>
+            <ActiveLink
+              activeClass="text-white font-medium"
+              href="/auth/signin"
+            >
+              <a className="px-2 py-1 hover:text-white transition-colors duration-300">
+                Sign In
+              </a>
+            </ActiveLink>
           </div>
           <div className="">
-            <Link href="/auth/singup">
-              <button className="px-4 py-2 bg-black text-white rounded-full">
+            <ActiveLink
+              activeClass="bg-transparent text-black border border-white"
+              href="/auth/singup"
+            >
+              <button className="px-4 py-2 bg-black hover:bg-transparent hover:text-black border border-transparent hover:border-white transition-all duration-300 text-white rounded-full  ">
                 Get started
               </button>
-            </Link>
+            </ActiveLink>
           </div>
         </div>
       </div>
